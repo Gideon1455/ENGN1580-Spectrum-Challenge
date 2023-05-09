@@ -1,7 +1,7 @@
-from channel import Channel
-from receiver import Receiver
-from transmitter import Transmitter
-from utils import dec16_to_hex16, hex16_to_dec16
+from ..components.channel import Channel
+from ..components.receiver import Receiver
+from ..components.transmitter import Transmitter
+from ..utils.utils import dec16_to_hex16, hex16_to_dec16
 
 def start(cid, uid):
     channel = Channel(cid, uid)
