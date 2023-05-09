@@ -33,3 +33,5 @@ if __name__ == '__main__':
     CID = 'PUT_CHANNEL_ID_HERE'
     UID = 'PUT_USER_ID_HERE'
     start(CID, UID)
+
+    hi
