@@ -3,6 +3,7 @@ from .components.receiver import Receiver
 from .components.transmitter import Transmitter
 from .utils.utils import dec16_to_hex16, hex16_to_dec16
 
+
 def start(cid, uid):
     channel = Channel(cid, uid)
 
@@ -27,7 +28,8 @@ def start(cid, uid):
 
         if c_state == 'STOP':
             # put stuff to do when channel stops here
-            break # ends while loop
+            break  # ends while loop
+
 
 if __name__ == '__main__':
     CID = 'PUT_CHANNEL_ID_HERE'

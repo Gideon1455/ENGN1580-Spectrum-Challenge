@@ -1,9 +1,11 @@
 import requests
 import re
 
+
 class Channel:
     """Represents a channel.
     """
+
     def __init__(self, cid, uid, url="http://34.145.212.117/SpectrumChallenge/"):
         """Constructor for a channel.
         
@@ -25,7 +27,6 @@ class Channel:
         self.GET_C_STATE = 'getCstate.php'
         self.GET_C_SCORE = 'getCscore.php'
 
-
     def get_clock(self):
         """Returns the current frame number and time for the channel.
 
@@ -42,7 +43,6 @@ class Channel:
         except ValueError:
             raise RuntimeError('Trouble with channel output file')
 
-
     def get_output(self):
         """Returns the channel output on the current frame.
 
@@ -58,7 +58,6 @@ class Channel:
         except ValueError:
             raise RuntimeError('Trouble with channel output file')
 
-
     def get_params(self):
         """Returns the channel parameters.
 
@@ -70,7 +69,6 @@ class Channel:
         _, duration, noise, frame_width, samples = req.text.split()
         return int(duration), float(noise), int(frame_width), int(samples)
 
-
     def get_state(self):
         """Returns the channel state.
 
@@ -81,7 +79,6 @@ class Channel:
         req = requests.get(self.url + self.GET_C_STATE, params=params)
         _, _, state = req.text.split()
         return state
-    
 
     def get_score(self):
         """Gets current score.
