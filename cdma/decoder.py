@@ -6,19 +6,22 @@ path.append(getcwd() + "/utils")
 import numpy as np
 from prng import generate # type: ignore
 
-clen = 128
-c = np.array(generate(140256304, clen))
-c[c==0] = -1
+seed = 1 # < PUT YOUR ID HERE (REPLACE THE 1 WITH YOUR ID) >
+nbits = 128
 
 with open("CDMA128_2023.txt", "r") as f:
     lines = f.readlines()
 
 Q = np.array([list(map(lambda x: int(x), l)) for l in [line.strip().split() for line in lines]])
-m = np.matmul(Q,c) > 0
 
+S = np.array(generate(seed, len(lines) * nbits)).reshape((len(lines), nbits))
+S[S==0] = -1
+
+m = np.sum(Q * S, 1) > 0
 mystr = ''
 for i in range(0, len(m), 7):
-    bits = int(''.join(map(lambda x: str(int(x)), m[i:i+7])))
-    mystr += chr(bits)
+    bits = np.flip(m[i:i+7])
+    bits = ''.join(map(lambda x: str(int(x)), bits))
+    mystr += chr(int(bits, 2))
 
 print(mystr)

@@ -7,12 +7,15 @@ def generate(seed, number_of_bits):
     if len(seed) < 31: seed = np.pad(seed, (31 - len(seed), 0))
 
     seed = list(seed)
-    seed.reverse()
+
+    sr = seed[:]
+    sr.reverse()
+
     output = []
     for _ in range(number_of_bits):
-        tap1, tap2 = seed[27], seed[30]
+        tap1, tap2 = sr[27], sr[30]
         new_value = tap1 ^ tap2
-        output.append(seed.pop(-1))
-        seed.insert(0, new_value)
-    
+        output.append(sr.pop())
+        sr.insert(0, new_value)
+
     return output
