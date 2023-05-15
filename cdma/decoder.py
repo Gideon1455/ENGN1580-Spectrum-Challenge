@@ -4,7 +4,7 @@ from os import getcwd
 path.append(getcwd() + "/utils")
 
 import numpy as np
-from prng import generate # type: ignore
+from pnsg import generate # type: ignore
 
 seed = 1 # < PUT YOUR ID HERE (REPLACE THE 1 WITH YOUR ID) >
 nbits = 128
