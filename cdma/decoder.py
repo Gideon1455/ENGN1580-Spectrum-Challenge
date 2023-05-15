@@ -17,11 +17,10 @@ Q = np.array([list(map(lambda x: int(x), l)) for l in [line.strip().split() for 
 S = np.array(generate(seed, len(lines) * frame_width)).reshape((len(lines), frame_width))
 S[S==0] = -1
 
-m = np.sum(Q * S, 1) > 0
-mystr = ''
-for i in range(0, len(m), 7):
-    bits = np.flip(m[i:i+7])
-    bits = ''.join(map(lambda x: str(int(x)), bits))
-    mystr += chr(int(bits, 2))
+b_hat = np.sum(Q * S, 1) > 0
+message = ''
+for i in range(0, len(b_hat), 7):
+    bit_string = ''.join(map(lambda x: str(int(x)), np.flip(b_hat[i:i+7])))
+    message += chr(int(bit_string, 2))
 
-print(mystr)
+print(message)
