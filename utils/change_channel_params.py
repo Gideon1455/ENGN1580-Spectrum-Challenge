@@ -2,7 +2,7 @@ import requests
 
 cid = 'JustinTest1'
 uid = 'S1'
-duration = '128'
+duration = '15'
 noise = '0'
 frame_width = '1000'
 samples = '128'

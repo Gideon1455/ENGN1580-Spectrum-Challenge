@@ -14,11 +14,11 @@ import numpy as np
 def start(cid, uid):
     channel = Channel(cid, uid)
     receiver = Receiver(cid, uid)
-    N_BLOCKS = 4
+    N_BLOCKS = 32
     SAMPLES_PER_FRAME = 128
     SAMPLES_PER_BLOCK = SAMPLES_PER_FRAME // N_BLOCKS
     B_PER_FRAME = 4 * N_BLOCKS
-    ENERGY = (2**12)**2
+    ENERGY = (2**12)**2 - 1
     freq = 1
 
     phi1 = np.sqrt(2) * np.cos(freq * 2 * np.pi * np.arange(SAMPLES_PER_BLOCK) / SAMPLES_PER_BLOCK)
