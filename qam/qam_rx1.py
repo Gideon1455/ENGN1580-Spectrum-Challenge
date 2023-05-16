@@ -10,7 +10,6 @@ from transmitter import Transmitter # type: ignore
 from utils import dec16_to_hex16, hex16_to_dec16, s_to_arr, arr_to_s
 
 import numpy as np
-import matplotlib.pyplot as plt
 
 def start(cid, uid):
     channel = Channel(cid, uid)
