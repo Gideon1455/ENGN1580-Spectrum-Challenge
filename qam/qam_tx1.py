@@ -73,10 +73,6 @@ def start(cid, uid):
                     s_blocks[i] = amp1 * phi1 + amp2 * phi2
         
                 to_send = np.round(np.sqrt(8 * ENERGY / 9) * s_blocks.flatten()).astype(int)
-                print(arr_to_s(to_send))
-                plt.plot(to_send)
-                plt.title('tx')
-                plt.show()
                 transmitter.transmit(current_frame, arr_to_s(to_send))
                 print(f'sending frame {current_frame}: ' + b_str)
                 sent_frames.append(current_frame)

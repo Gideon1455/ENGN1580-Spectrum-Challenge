@@ -46,18 +46,14 @@ def start(cid, uid):
             if current_frame not in seen_frames:
                 b_per_frame = 16
                 r = s_to_arr(signal)
-                print(signal)
-                plt.plot(r)
-                plt.show()
 
                 bits = np.zeros(b_per_frame)
                 for i, idx in enumerate(range(0, r.size, SAMPLES_PER_BLOCK)):
                     r_slice = r[idx:idx+SAMPLES_PER_BLOCK]
                     y1 = phi1 * r_slice
                     y2 = phi2 * r_slice
-                    amp1 = np.sum(y1) / np.sqrt(8 * ENERGY / 9)
-                    amp2 = np.sum(y2) / np.sqrt(8 * ENERGY / 9)
-                    print(amp1, amp2)
+                    amp1 = np.sum(y1) / np.sqrt(8 * ENERGY / 9) / SAMPLES_PER_BLOCK
+                    amp2 = np.sum(y2) / np.sqrt(8 * ENERGY / 9) / SAMPLES_PER_BLOCK
                     ang = abs(np.rad2deg(np.arctan(amp2/amp1)))
 
                     bits[4*i] = 0 if amp1 > 0 else 1
