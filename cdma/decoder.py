@@ -6,10 +6,10 @@ path.append(getcwd() + "/utils")
 import numpy as np
 from pnsg import generate # type: ignore
 
-seed = 1 # < PUT YOUR ID HERE (REPLACE THE 1 WITH YOUR ID) >
-frame_width = 128
+seed = 140291233 # < PUT YOUR ID HERE (REPLACE THE 1 WITH YOUR ID) >
+frame_width = 256
 
-with open("CDMA128_2023.txt", "r") as f:
+with open("CDMA256_2023.txt", "r") as f:
     lines = f.readlines()
 
 Q = np.array([list(map(lambda x: int(x), l)) for l in [line.strip().split() for line in lines]])

@@ -48,7 +48,7 @@ def start(cid, uid):
                 sent_frames.append(current_frame)
 
         if c_state == 'STOP':
-            _, sent, errors = channel.get_score()
+            _, sent, errors = channel.get_my_score()
             print(f'Total sent: {sent}, Total errors: {errors}')
             break
 

@@ -24,6 +24,7 @@ class Channel:
         self.GET_C_PARAMS = 'getCparams.php'
         self.GET_C_STATE = 'getCstate.php'
         self.GET_C_SCORE = 'getCscore.php'
+        self.GET_MY_SCORE = 'getMYscore.php'
 
 
     def get_clock(self):
@@ -83,13 +84,13 @@ class Channel:
         return state
     
 
-    def get_score(self):
+    def get_my_score(self):
         """Gets current score.
 
         :return: frame number, cumulative bits sent, cumulative errors
         :rtype: tuple(int, int, int)
         """
         params = {'UID': self.uid, 'CID': self.cid}
-        req = requests.get(self.url + self.GET_C_SCORE, params=params)
-        frame_number, sent, errors = re.search(f"{self.uid} ([0-9]+ [0-9]+ [0-9]+)", req.text).group(1).split()
+        req = requests.get(self.url + self.GET_MY_SCORE, params=params)
+        frame_number, sent, errors = re.search(f"score ([0-9]+ [0-9]+ [0-9]+)", req.text).group(1).split()
         return int(frame_number), int(sent), int(errors)
