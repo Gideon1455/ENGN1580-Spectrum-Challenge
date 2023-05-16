@@ -18,6 +18,7 @@ def start(cid, uid):
     N_BLOCKS = 4
     SAMPLES_PER_FRAME = 128
     SAMPLES_PER_BLOCK = SAMPLES_PER_FRAME // N_BLOCKS
+    B_PER_FRAME = 4 * N_BLOCKS
     ENERGY = (2**12)**2
     freq = 1
 
@@ -44,33 +45,30 @@ def start(cid, uid):
                 continue
 
             if current_frame not in seen_frames:
-                b_per_frame = 16
                 r = s_to_arr(signal)
 
-                bits = np.zeros(b_per_frame)
+                bits = np.zeros(B_PER_FRAME)
                 for i, idx in enumerate(range(0, r.size, SAMPLES_PER_BLOCK)):
                     r_slice = r[idx:idx+SAMPLES_PER_BLOCK]
                     y1 = phi1 * r_slice
                     y2 = phi2 * r_slice
                     amp1 = np.sum(y1) / np.sqrt(8 * ENERGY / 9) / SAMPLES_PER_BLOCK
                     amp2 = np.sum(y2) / np.sqrt(8 * ENERGY / 9) / SAMPLES_PER_BLOCK
-                    ang = abs(np.rad2deg(np.arctan(amp2/amp1)))
 
-                    bits[4*i] = 0 if amp1 > 0 else 1
-                    bits[4*i+1] = 0 if amp2 > 0 else 1
+                    print(round(amp1,2),round(amp2,2))
+
+                    phi1_divs = np.array([amp1 < -0.5, amp1 >= -0.5 and amp1 < 0, amp1 >= 0 and amp1 < 0.5, amp1 >= 0.5])
+                    phi2_divs = np.array([amp2 >= 0.5, amp2 >= 0 and amp2 < 0.5, amp2 >= -0.5 and amp2 < 0, amp2 < -0.5])
+                    grid = np.expand_dims(phi2_divs, 1) @ np.expand_dims(phi1_divs, 0)
+                    outputs = np.array([[[1,0,1,1], [1,0,0,1], [0,0,1,0], [0,0,1,1]],
+                                        [[1,0,1,0], [1,0,0,0], [0,0,0,0], [0,0,0,1]],
+                                        [[1,1,0,1], [1,1,0,0], [0,1,0,0], [0,1,1,0]],
+                                        [[1,1,1,1], [1,1,1,0], [0,1,0,1], [0,1,1,1]]])
                     
-                    if abs(amp1) > 0.5 and abs(amp2) > 0.5:
-                        bits[4*i+2] = 1
-                        bits[4*i+3] = 1
-                    elif abs(amp1) < 0.5 and abs(amp2) < 0.5:
-                        bits[4*i+2] = 0
-                        bits[4*i+3] = 0
-                    else:
-                        bits[4*i+2] = 1 if ang > 45 else 0
-                        bits[4*i+3] = 1 if ang < 45 else 0
+                    bits[4*i:4*i + 4] = outputs[grid,:].flatten()
 
                 b_hat = hex(int(''.join(bits.astype(int).astype(str)), 2)).split('x')[-1]
-                b_hat = '0' * (4 - len(b_hat)) + b_hat
+                b_hat = '0' * (B_PER_FRAME // 4 - len(b_hat)) + b_hat
 
                 receiver.post_b_hat(b_hat)
                 print(f'received frame {current_frame}: ' + ''.join(bits.astype(int).astype(str)))
@@ -82,6 +80,6 @@ def start(cid, uid):
             break
 
 if __name__ == '__main__':
-    CID = 'JustinTest'
+    CID = 'JustinTest1'
     UID = 'S1'
     start(CID, UID)

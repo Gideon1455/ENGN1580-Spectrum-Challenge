@@ -19,6 +19,7 @@ def start(cid, uid):
     N_BLOCKS = 4
     SAMPLES_PER_FRAME = 128
     SAMPLES_PER_BLOCK = SAMPLES_PER_FRAME // N_BLOCKS
+    B_PER_FRAME = 4 * N_BLOCKS
     ENERGY = (2**12)**2
     freq = 1
 
@@ -42,34 +43,23 @@ def start(cid, uid):
                 continue
 
             if current_frame not in sent_frames:
-                b_per_frame = 16
-                b = transmitter.get_b(b_per_frame / 8) # 8 bits, 2 hex chars
+                b = transmitter.get_b(B_PER_FRAME / 8) # 8 bits, 2 hex chars
                 b_str = bin(int(b, 16)).split('b')[-1]
-                b_str = '0' * (b_per_frame - len(b_str)) + b_str
+                b_str = '0' * (B_PER_FRAME - len(b_str)) + b_str
                 
                 s_blocks = np.zeros((N_BLOCKS, SAMPLES_PER_BLOCK))
                 for i, idx in enumerate(range(0, len(b_str), 4)):
                     str_slice = b_str[idx:idx+4]
 
-                    if str_slice[-2:] == '00':
-                        amp1 = 0.25
-                        amp2 = 0.25
-                    elif str_slice[-2:] == '01':
-                        amp1 = 0.75
-                        amp2 = 0.25
-                    elif str_slice[-2:] == '10':
-                        amp1 = 0.25
-                        amp2 = 0.75
-                    else:
-                        amp1 = 0.75
-                        amp2 = 0.75
+                    grid = np.array([['1011', '1001', '0010', '0011'],
+                                     ['1010', '1000', '0000', '0001'],
+                                     ['1101', '1100', '0100', '0110'],
+                                     ['1111', '1110', '0101', '0111']])
                     
-                    if str_slice[0] == '1':
-                        amp1 = -amp1
-                    
-                    if str_slice[1] == '1':
-                        amp2 = -amp2
-                    
+                    amp1_grid, amp2_grid = np.meshgrid([-.75,-.25,.25,.75],[.75,.25,-.25,-.75])
+
+                    amp1, amp2 = amp1_grid[grid == str_slice][0], amp2_grid[grid == str_slice][0]
+
                     s_blocks[i] = amp1 * phi1 + amp2 * phi2
         
                 to_send = np.round(np.sqrt(8 * ENERGY / 9) * s_blocks.flatten()).astype(int)
@@ -81,6 +71,6 @@ def start(cid, uid):
             break
 
 if __name__ == '__main__':
-    CID = 'JustinTest'
+    CID = 'JustinTest1'
     UID = 'S1'
     start(CID, UID)
