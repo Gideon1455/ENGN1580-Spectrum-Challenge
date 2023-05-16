@@ -54,8 +54,6 @@ def start(cid, uid):
                     amp1 = np.sum(y1) / np.sqrt(8 * ENERGY / 9) / SAMPLES_PER_BLOCK
                     amp2 = np.sum(y2) / np.sqrt(8 * ENERGY / 9) / SAMPLES_PER_BLOCK
 
-                    print(round(amp1,2),round(amp2,2))
-
                     phi1_divs = np.array([amp1 < -0.5, amp1 >= -0.5 and amp1 < 0, amp1 >= 0 and amp1 < 0.5, amp1 >= 0.5])
                     phi2_divs = np.array([amp2 >= 0.5, amp2 >= 0 and amp2 < 0.5, amp2 >= -0.5 and amp2 < 0, amp2 < -0.5])
                     grid = np.expand_dims(phi2_divs, 1) @ np.expand_dims(phi1_divs, 0)
