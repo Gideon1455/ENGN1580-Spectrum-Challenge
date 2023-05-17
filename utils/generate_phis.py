@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 
 def generate_phi_pair(interval_len, period):
     n_periods = interval_len // period;
