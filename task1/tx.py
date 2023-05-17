@@ -63,13 +63,13 @@ def start(cid, uid):
         
                 to_send = np.round(np.sqrt(ENERGY / 2.3) * s_blocks.flatten()).astype(int)
                 transmitter.transmit(current_frame, arr_to_s(to_send))
-                print(f'sending frame {current_frame}: ' + b_str)
+                # print(f'sending frame {current_frame}: ' + b_str)
                 sent_frames.append(current_frame)
 
         if c_state == 'STOP':
             break
 
 if __name__ == '__main__':
-    CID = 'JustinTest2'
-    UID = 'S1'
+    CID = 'XXXSoloRed'
+    UID = 'RedOctober'
     start(CID, UID)
