@@ -259,7 +259,7 @@ def start(cid, uid, url):
     SAMPLES_PER_BLOCK = SAMPLES_PER_FRAME // N_BLOCKS
     B_PER_BLOCK = 2
     B_PER_FRAME = B_PER_BLOCK * N_BLOCKS
-    ENERGY = (2**12)**2 / 1.000132
+    ENERGY = (2**12)**2 / 1.000132 / 10
 
     phis = generate_phi_pair(SAMPLES_PER_BLOCK, SAMPLES_PER_BLOCK)
  
