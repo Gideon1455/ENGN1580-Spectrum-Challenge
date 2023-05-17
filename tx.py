@@ -2,6 +2,7 @@ import sys
 import requests
 import re
 import numpy as np
+import time
 
 class Channel:
     """Represents a channel.
@@ -306,6 +307,7 @@ def start(cid, uid, url):
 
         if c_state == 'STOP':
             break
+        time.sleep(0.001)
 
 if __name__ == '__main__':
     CID = sys.argv[1]
