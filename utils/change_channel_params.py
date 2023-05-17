@@ -1,10 +1,10 @@
 import requests
 
-cid = 'JustinTest'
+cid = 'JustinTest2'
 uid = 'S1'
-duration = '10'
-noise = '0'
-frame_width = '2000'
+duration = '128'
+noise = '0.02'
+frame_width = '1000'
 samples = '128'
 
 url = 'http://34.145.212.117/SpectrumChallenge/postCparams.php'
