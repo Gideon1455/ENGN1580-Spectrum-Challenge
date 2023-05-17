@@ -292,7 +292,6 @@ def start(cid, uid, url):
                     s_blocks[i] = np.sum(phis * np.expand_dims(bits[B_PER_BLOCK*i:B_PER_BLOCK*(i+1)],1), 0)
 
                 to_send = np.round(np.sqrt(ENERGY / 2) * s_blocks.flatten()).astype(int)
-                print(np.sum(np.square(to_send)) / 128)
                 transmitter.transmit(current_frame, arr_to_s(to_send))
                 print(f'sending frame {current_frame}: ' + b_str)
                 sent_frames.append(current_frame)
