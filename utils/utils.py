@@ -17,3 +17,8 @@ def s_to_arr(s):
     for i in range(out.size):
         out[i] = hex16_to_dec16(s[4*i: 4*i + 4])
     return out
+
+def int_to_bin(i, l):
+    b = bin(i).split('b')[-1]
+    b = '0' * (l - len(b)) + b
+    return b

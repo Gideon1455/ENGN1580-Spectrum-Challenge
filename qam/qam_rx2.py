@@ -7,7 +7,7 @@ path.append(getcwd() + "/utils")
 from channel import Channel # type: ignore
 from receiver import Receiver # type: ignore
 from transmitter import Transmitter # type: ignore
-from utils import dec16_to_hex16, hex16_to_dec16, s_to_arr, arr_to_s
+from utils import dec16_to_hex16, hex16_to_dec16, s_to_arr, arr_to_s, int_to_bin
 from generate_phis import generate_phi_pair # type: ignore
 
 import numpy as np
@@ -18,16 +18,12 @@ def start(cid, uid):
     N_BLOCKS = 32
     SAMPLES_PER_FRAME = 128
     SAMPLES_PER_BLOCK = SAMPLES_PER_FRAME // N_BLOCKS
-    B_PER_FRAME = 4 * N_BLOCKS
+    B_PER_BLOCK = 9
+    B_PER_FRAME = B_PER_BLOCK * N_BLOCKS
     ENERGY = (2**12)**2 - 1
-    freq = 1
 
-    phi1 = np.sqrt(2) * np.cos(freq * 2 * np.pi * np.arange(SAMPLES_PER_BLOCK) / SAMPLES_PER_BLOCK)
-    phi2 = np.sqrt(2) * np.sin(freq * 2 * np.pi * np.arange(SAMPLES_PER_BLOCK) / SAMPLES_PER_BLOCK)
-
-    phis = generate_phi_pair(4,4)
-    phi1 = phis[0,:]
-    phi2 = phis[1,:]
+    phis = np.vstack((np.ones(SAMPLES_PER_BLOCK), generate_phi_pair(SAMPLES_PER_BLOCK, SAMPLES_PER_BLOCK)))
+    i_to_bin_vectorized = np.vectorize(lambda x: int_to_bin(x, B_PER_BLOCK))
  
     seen_frames = []
 
@@ -54,20 +50,23 @@ def start(cid, uid):
                 bits = np.zeros(B_PER_FRAME)
                 for i, idx in enumerate(range(0, r.size, SAMPLES_PER_BLOCK)):
                     r_slice = r[idx:idx+SAMPLES_PER_BLOCK]
-                    y1 = phi1 * r_slice
-                    y2 = phi2 * r_slice
-                    amp1 = np.sum(y1) / np.sqrt(8 * ENERGY / 9) / SAMPLES_PER_BLOCK
-                    amp2 = np.sum(y2) / np.sqrt(8 * ENERGY / 9) / SAMPLES_PER_BLOCK
-                    phi1_divs = np.array([amp1 < -0.5, amp1 >= -0.5 and amp1 < 0, amp1 >= 0 and amp1 < 0.5, amp1 >= 0.5])
-                    phi2_divs = np.array([amp2 >= 0.5, amp2 >= 0 and amp2 < 0.5, amp2 >= -0.5 and amp2 < 0, amp2 < -0.5])
-                    grid = np.expand_dims(phi2_divs, 1) @ np.expand_dims(phi1_divs, 0)
-                    outputs = np.array([[[1,0,1,1], [1,0,0,1], [0,0,1,0], [0,0,1,1]],
-                                        [[1,0,1,0], [1,0,0,0], [0,0,0,0], [0,0,0,1]],
-                                        [[1,1,0,1], [1,1,0,0], [0,1,0,0], [0,1,1,0]],
-                                        [[1,1,1,1], [1,1,1,0], [0,1,0,1], [0,1,1,1]]])
-                    
-                    bits[4*i:4*i + 4] = outputs[grid,:].flatten()
+                    ys = phis * r_slice
+                    amps = np.sum(ys, 1) / np.sqrt(ENERGY / 2.3) / SAMPLES_PER_BLOCK
 
+                    boundaries = [-0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75]
+                    phi_divs = np.zeros((len(phis), len(boundaries) + 1))
+
+                    for j, boundary in enumerate(boundaries):
+                        if i == 0:
+                            phi_divs[:, j] = amps < boundary
+                        else:
+                            phi_divs[:, j] = (amps < boundary) & (amps >= boundaries[j-1])
+
+                    phi_divs[:, -1] = amps >= boundaries[-1]
+
+                    x,y,z = np.argmax(phi_divs,1)
+                    bits[B_PER_BLOCK*i:B_PER_BLOCK*(i+1)] = list(i_to_bin_vectorized(np.arange(8**3)).reshape((8,8,8))[x,y,z])
+                
                 b_hat = hex(int(''.join(bits.astype(int).astype(str)), 2)).split('x')[-1]
                 b_hat = '0' * (B_PER_FRAME // 4 - len(b_hat)) + b_hat
 
