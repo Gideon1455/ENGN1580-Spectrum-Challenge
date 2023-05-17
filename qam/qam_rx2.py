@@ -9,6 +9,7 @@ from receiver import Receiver # type: ignore
 from transmitter import Transmitter # type: ignore
 from utils import dec16_to_hex16, hex16_to_dec16, s_to_arr, arr_to_s, int_to_bin
 from generate_phis import generate_phi_pair # type: ignore
+from gray_code import gray_code # type: ignore
 
 import numpy as np
 
@@ -24,7 +25,8 @@ def start(cid, uid):
 
     phis = np.vstack((np.ones(SAMPLES_PER_BLOCK), generate_phi_pair(SAMPLES_PER_BLOCK, SAMPLES_PER_BLOCK)))
     i_to_bin_vectorized = np.vectorize(lambda x: int_to_bin(x, B_PER_BLOCK))
- 
+    grid = i_to_bin_vectorized(np.arange(8**3).reshape((8,8,8)))
+    
     seen_frames = []
 
     while True:
@@ -65,7 +67,7 @@ def start(cid, uid):
                     phi_divs[:, -1] = amps >= boundaries[-1]
 
                     x,y,z = np.argmax(phi_divs,1)
-                    bits[B_PER_BLOCK*i:B_PER_BLOCK*(i+1)] = list(i_to_bin_vectorized(np.arange(8**3)).reshape((8,8,8))[x,y,z])
+                    bits[B_PER_BLOCK*i:B_PER_BLOCK*(i+1)] = list(grid[x,y,z])
                 
                 b_hat = hex(int(''.join(bits.astype(int).astype(str)), 2)).split('x')[-1]
                 b_hat = '0' * (B_PER_FRAME // 4 - len(b_hat)) + b_hat

@@ -9,6 +9,7 @@ from receiver import Receiver # type: ignore
 from transmitter import Transmitter # type: ignore
 from utils import dec16_to_hex16, hex16_to_dec16, s_to_arr, arr_to_s, int_to_bin
 from generate_phis import generate_phi_pair # type: ignore
+from gray_code import gray_code # type: ignore
 
 import numpy as np
 
@@ -25,11 +26,12 @@ def start(cid, uid):
 
     phis = np.vstack((np.ones(SAMPLES_PER_BLOCK), generate_phi_pair(SAMPLES_PER_BLOCK, SAMPLES_PER_BLOCK)))
     i_to_bin_vectorized = np.vectorize(lambda x: int_to_bin(x, B_PER_BLOCK))
+    grid = i_to_bin_vectorized(np.arange(8**3).reshape((8,8,8)))
     
     while True:
         c_state = channel.get_state()
         started = False
-
+        
         if c_state == 'IDLE':
             continue
 
@@ -51,7 +53,6 @@ def start(cid, uid):
                 for i, idx in enumerate(range(0, len(b_str), B_PER_BLOCK)):
                     str_slice = b_str[idx:idx+B_PER_BLOCK]
 
-                    grid = i_to_bin_vectorized(np.arange(8**3)).reshape((8,8,8))
                     amp2_grid, amp1_grid, amp3_grid = np.meshgrid([-0.875, -0.625, -0.375, -0.125, 0.125, 0.375, 0.625, 0.875],
                                                                   [-0.875, -0.625, -0.375, -0.125, 0.125, 0.375, 0.625, 0.875],
                                                                   [-0.875, -0.625, -0.375, -0.125, 0.125, 0.375, 0.625, 0.875])
