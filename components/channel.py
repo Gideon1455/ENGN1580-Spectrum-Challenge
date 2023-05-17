@@ -80,7 +80,10 @@ class Channel:
         """
         params = {'CID': self.cid, 'UID': self.uid}
         req = requests.get(self.url + self.GET_C_STATE, params=params)
-        _, _, state = req.text.split()
+        try:
+            _, _, state = req.text.split()
+        except:
+            state = ''
         return state
     
 
