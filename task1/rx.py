@@ -73,12 +73,12 @@ def start(cid, uid):
                 b_hat = '0' * (B_PER_FRAME // 4 - len(b_hat)) + b_hat
 
                 receiver.post_b_hat(b_hat)
-                # print(f'received frame {current_frame}: ' + ''.join(bits.astype(int).astype(str)))
+                print(f'received frame {current_frame}: ' + ''.join(bits.astype(int).astype(str)))
                 seen_frames.append(current_frame)
 
         if c_state == 'STOP':
-            # _, sent, errors = channel.get_my_score()
-            # print(f'Total sent: {sent}, Total errors: {errors}')
+            _, sent, errors = channel.get_my_score()
+            print(f'Total sent: {sent}, Total errors: {errors}')
             break
 
 if __name__ == '__main__':
