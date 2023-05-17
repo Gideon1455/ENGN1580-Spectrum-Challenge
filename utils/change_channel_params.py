@@ -2,8 +2,8 @@ import requests
 
 cid = 'JustinTest'
 uid = 'S1'
-duration = '128'
-noise = '0.0'
+duration = '30'
+noise = '0'
 frame_width = '1000'
 samples = '128'
 
