@@ -20,18 +20,16 @@ def start(cid, uid):
     N_BLOCKS = 32
     SAMPLES_PER_FRAME = 128
     SAMPLES_PER_BLOCK = SAMPLES_PER_FRAME // N_BLOCKS
-    B_PER_BLOCK = 9
+    B_PER_BLOCK = 2
     B_PER_FRAME = B_PER_BLOCK * N_BLOCKS
-    ENERGY = (2**12)**2 / 0.5
+    ENERGY = (2**12)**2 / 1.000132
 
-    phis = np.vstack((np.ones(SAMPLES_PER_BLOCK), generate_phi_pair(SAMPLES_PER_BLOCK, SAMPLES_PER_BLOCK)))
-    i_to_bin_vectorized = np.vectorize(lambda x: int_to_bin(x, B_PER_BLOCK))
-    grid = i_to_bin_vectorized(np.arange(8**3).reshape((8,8,8)))
-    
+    phis = generate_phi_pair(SAMPLES_PER_BLOCK, SAMPLES_PER_BLOCK)
+
     while True:
         c_state = channel.get_state()
         started = False
-        
+
         if c_state == 'IDLE':
             continue
 
@@ -48,20 +46,15 @@ def start(cid, uid):
                 b = transmitter.get_b(B_PER_FRAME // 8) # 8 bits, 2 hex chars
                 b_str = bin(int(b, 16)).split('b')[-1]
                 b_str = '0' * (B_PER_FRAME - len(b_str)) + b_str
-                
+                bits = np.array([1 if c == '1' else -1 for c in b_str])
+
                 s_blocks = np.zeros((N_BLOCKS, SAMPLES_PER_BLOCK))
-                for i, idx in enumerate(range(0, len(b_str), B_PER_BLOCK)):
-                    str_slice = b_str[idx:idx+B_PER_BLOCK]
+                
+                for i in range(N_BLOCKS):
+                    s_blocks[i] = np.sum(phis * np.expand_dims(bits[B_PER_BLOCK*i:B_PER_BLOCK*(i+1)],1), 0)
 
-                    amp2_grid, amp1_grid, amp3_grid = np.meshgrid([-0.875, -0.625, -0.375, -0.125, 0.125, 0.375, 0.625, 0.875],
-                                                                  [-0.875, -0.625, -0.375, -0.125, 0.125, 0.375, 0.625, 0.875],
-                                                                  [-0.875, -0.625, -0.375, -0.125, 0.125, 0.375, 0.625, 0.875])
-
-                    amp1, amp2, amp3 = amp1_grid[grid == str_slice][0], amp2_grid[grid == str_slice][0], amp3_grid[grid == str_slice][0]
-
-                    s_blocks[i] = np.sum(np.expand_dims(np.array([amp1,amp2,amp3]),1) * phis, 0)
-        
-                to_send = np.round(np.sqrt(ENERGY / 2.3) * s_blocks.flatten()).astype(int)
+                to_send = np.round(np.sqrt(ENERGY / 2) * s_blocks.flatten()).astype(int)
+                print(np.sum(np.square(to_send)) / 128)
                 transmitter.transmit(current_frame, arr_to_s(to_send))
                 print(f'sending frame {current_frame}: ' + b_str)
                 sent_frames.append(current_frame)

@@ -19,14 +19,12 @@ def start(cid, uid):
     N_BLOCKS = 32
     SAMPLES_PER_FRAME = 128
     SAMPLES_PER_BLOCK = SAMPLES_PER_FRAME // N_BLOCKS
-    B_PER_BLOCK = 9
+    B_PER_BLOCK = 2
     B_PER_FRAME = B_PER_BLOCK * N_BLOCKS
-    ENERGY = (2**12)**2 / 0.5
+    ENERGY = (2**12)**2 / 1.000132
 
-    phis = np.vstack((np.ones(SAMPLES_PER_BLOCK), generate_phi_pair(SAMPLES_PER_BLOCK, SAMPLES_PER_BLOCK)))
-    i_to_bin_vectorized = np.vectorize(lambda x: int_to_bin(x, B_PER_BLOCK))
-    grid = i_to_bin_vectorized(np.arange(8**3).reshape((8,8,8)))
-    
+    phis = generate_phi_pair(SAMPLES_PER_BLOCK, SAMPLES_PER_BLOCK)
+ 
     seen_frames = []
 
     while True:
@@ -53,22 +51,9 @@ def start(cid, uid):
                 for i, idx in enumerate(range(0, r.size, SAMPLES_PER_BLOCK)):
                     r_slice = r[idx:idx+SAMPLES_PER_BLOCK]
                     ys = phis * r_slice
-                    amps = np.sum(ys, 1) / np.sqrt(ENERGY / 2.3) / SAMPLES_PER_BLOCK
+                    amps = np.sum(ys, 1) / np.sqrt(ENERGY / 2) / SAMPLES_PER_BLOCK
+                    bits[B_PER_BLOCK*i:B_PER_BLOCK*(i+1)] = amps > 0
 
-                    boundaries = [-0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75]
-                    phi_divs = np.zeros((len(phis), len(boundaries) + 1))
-
-                    for j, boundary in enumerate(boundaries):
-                        if i == 0:
-                            phi_divs[:, j] = amps < boundary
-                        else:
-                            phi_divs[:, j] = (amps < boundary) & (amps >= boundaries[j-1])
-
-                    phi_divs[:, -1] = amps >= boundaries[-1]
-
-                    x,y,z = np.argmax(phi_divs,1)
-                    bits[B_PER_BLOCK*i:B_PER_BLOCK*(i+1)] = list(grid[x,y,z])
-                
                 b_hat = hex(int(''.join(bits.astype(int).astype(str)), 2)).split('x')[-1]
                 b_hat = '0' * (B_PER_FRAME // 4 - len(b_hat)) + b_hat
 

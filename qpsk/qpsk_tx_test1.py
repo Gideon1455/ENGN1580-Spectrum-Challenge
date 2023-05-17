@@ -57,6 +57,6 @@ def start(cid, uid):
             break
 
 if __name__ == '__main__':
-    CID = 'JustinTest'
-    UID = 'S1'
+    CID = 'JustinTest2'
+    UID = 'S2'
     start(CID, UID)

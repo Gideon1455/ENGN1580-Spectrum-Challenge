@@ -22,11 +22,14 @@ def start(cid, uid):
     SAMPLES_PER_BLOCK = SAMPLES_PER_FRAME // N_BLOCKS
     B_PER_BLOCK = 9
     B_PER_FRAME = B_PER_BLOCK * N_BLOCKS
-    ENERGY = (2**12)**2 / 0.5
+    ENERGY = (2**12)**2
 
     phis = np.vstack((np.ones(SAMPLES_PER_BLOCK), generate_phi_pair(SAMPLES_PER_BLOCK, SAMPLES_PER_BLOCK)))
     i_to_bin_vectorized = np.vectorize(lambda x: int_to_bin(x, B_PER_BLOCK))
     grid = i_to_bin_vectorized(np.arange(8**3).reshape((8,8,8)))
+
+    to_block = []
+    seen = []
     
     while True:
         c_state = channel.get_state()
@@ -42,6 +45,16 @@ def start(cid, uid):
             try:
                 current_frame, _ = channel.get_clock()
             except RuntimeError:
+                continue
+
+            
+            if current_frame == 0 or current_frame == 1 or current_frame == 2:
+                if (current_frame == 1 or current_frame == 2) and current_frame not in seen:
+                    try:
+                        to_block.append(int(transmitter.get_receiver_state()))
+                        seen.append(current_frame)
+                    except:
+                        print('ohno')
                 continue
 
             if current_frame not in sent_frames:
@@ -61,7 +74,21 @@ def start(cid, uid):
 
                     s_blocks[i] = np.sum(np.expand_dims(np.array([amp1,amp2,amp3]),1) * phis, 0)
         
-                to_send = np.round(np.sqrt(ENERGY / 2.3) * s_blocks.flatten()).astype(int)
+
+                if len(to_block) > 0:
+                    freq = np.mean(to_block)
+                    if abs(freq - 0) > 3 and abs(freq - N_BLOCKS) > 3:
+                        jam1 = np.sqrt(2) * np.cos(freq * 2 * np.pi * np.arange(SAMPLES_PER_FRAME) / SAMPLES_PER_FRAME)
+                        jam2 = np.sqrt(2) * np.sin(freq * 2 * np.pi * np.arange(SAMPLES_PER_FRAME) / SAMPLES_PER_FRAME)
+                        to_send = np.round(np.sqrt(ENERGY / 2.3) * s_blocks.flatten()).astype(int)
+                        to_send = np.round(np.sqrt(ENERGY / 2.1) * (jam1 + jam2)).astype(int)
+                        
+                    else:
+                        to_send = np.round(np.sqrt(ENERGY / 2.3) * s_blocks.flatten()).astype(int)
+                else:
+                    to_send = np.round(np.sqrt(ENERGY / 2.3) * s_blocks.flatten()).astype(int)
+
+                print(np.sum(np.square(to_send)) / SAMPLES_PER_FRAME)
                 transmitter.transmit(current_frame, arr_to_s(to_send))
                 print(f'sending frame {current_frame}: ' + b_str)
                 sent_frames.append(current_frame)
@@ -70,6 +97,6 @@ def start(cid, uid):
             break
 
 if __name__ == '__main__':
-    CID = 'JustinTest'
+    CID = 'JustinTest2'
     UID = 'S1'
     start(CID, UID)

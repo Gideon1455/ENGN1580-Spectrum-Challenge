@@ -2,9 +2,9 @@ import requests
 
 cid = 'JustinTest'
 uid = 'S1'
-duration = '128'
-noise = '0.1'
-frame_width = '1000'
+duration = '10'
+noise = '0'
+frame_width = '2000'
 samples = '128'
 
 url = 'http://34.145.212.117/SpectrumChallenge/postCparams.php'
